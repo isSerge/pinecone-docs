@@ -10,7 +10,8 @@
     "create": "node dist/create.js",
     "query": "node dist/query.js",
     "build": "rm -rf dist && tsc",
-    "lint": "eslint . --ext .ts"
+    "lint": "eslint . --ext .ts",
+    "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
   "author": "",
