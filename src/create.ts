@@ -103,18 +103,16 @@ async function main() {
   const loader = new DirectoryLoader('./documents', {
     ".md": (path) => new TextLoader(path)
   })
-
-  const docs = await loader.load()
   const vectorDimensions = 1536
-  const client = new PineconeClient()
   const indexName = config.PINECONE_INDEX;
-
-  await client.init({
-    apiKey: config.PINECONE_API_KEY,
-    environment: config.PINECONE_ENVIRONMENT,
-  });
-
+  const client = new PineconeClient()
+  
   try {
+    const docs = await loader.load()
+    await client.init({
+      apiKey: config.PINECONE_API_KEY,
+      environment: config.PINECONE_ENVIRONMENT,
+    });
     await createIndex(client, indexName, vectorDimensions)
     await updateIndex(client, indexName, docs)
   } catch (err) {
