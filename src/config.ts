@@ -20,7 +20,7 @@ class Config {
     const schema = Joi.object({
       OPENAI_API_KEY: Joi.string().required(),
       PINECONE_API_KEY: Joi.string().required(),
-      PINECONE_ENVIRONMENT: Joi.string().valid('production', 'development').required(),
+      PINECONE_ENVIRONMENT: Joi.string().required(),
       PINECONE_INDEX: Joi.string().required()
     });
 
