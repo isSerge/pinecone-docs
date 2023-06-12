@@ -20,8 +20,9 @@
     "@pinecone-database/pinecone": "^0.1.6",
     "chromadb": "^1.5.2",
     "dotenv": "^16.1.4",
+    "faiss-node": "^0.2.1",
     "joi": "^17.9.2",
-    "langchain": "^0.0.91",
+    "langchain": "0.0.92",
     "pino": "^8.10.0",
     "pino-pretty": "^9.3.0"
   },
