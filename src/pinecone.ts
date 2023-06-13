@@ -63,7 +63,7 @@ export class PineconeDB {
       const txtPath = document.metadata.source;
       const text = document.pageContent;
 
-      const chunks = (await textSplitter.createDocuments([text]));
+      const chunks = await textSplitter.createDocuments([text]);
 
       logger.info(`Adding ${chunks.length} chunks to index ${indexName}`);
 
