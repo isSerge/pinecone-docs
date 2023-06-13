@@ -4,25 +4,33 @@ import { DirectoryLoader } from 'langchain/document_loaders/fs/directory'
 import { logger } from "./logger"
 import { config } from "./config"
 import { PineconeDB } from "./pinecone"
+import { ChromaDB } from './chroma'
+import { FaissDB } from './faiss'
 
 async function main() {
   const loader = new DirectoryLoader('./documents', {
     ".md": (path) => new TextLoader(path)
-  })
-  const vectorDimensions = 1536
-  const indexName = config.PINECONE_INDEX;
-  const db = new PineconeDB();
+  });
+
+  const docs = await loader.load();
 
   try {
-    const docs = await loader.load()
-    await db.init({
-      apiKey: config.PINECONE_API_KEY,
-      environment: config.PINECONE_ENVIRONMENT,
-    });
-    await db.createIndex(indexName, vectorDimensions);
-    await db.updateIndex(indexName, docs);
+    if (config.DB_TYPE === 'pinecone') {
+      const vectorDimension = 1536
+      const indexName = config.PINECONE_INDEX;
+      const db = new PineconeDB();
+      await db.init({
+        apiKey: config.PINECONE_API_KEY,
+        environment: config.PINECONE_ENVIRONMENT,
+      });
+      await db.createIndex(indexName, vectorDimension);
+      await db.updateIndex(indexName, docs);
+    } else {
+      const db = config.DB_TYPE === 'faiss' ? new FaissDB() : new ChromaDB();
+      await db.init(docs);
+    }
   } catch (err) {
-    logger.error('error: ', err)
+    logger.error(err, 'error: ')
   }
 }
 
