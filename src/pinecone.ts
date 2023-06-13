@@ -56,8 +56,6 @@ export class PineconeDB {
 
     logger.info(`Updating index ${indexName}`);
 
-    const batchSize = 100;
-
     for (const document of docs) {
       logger.info(`Adding document ${document.metadata} to index ${indexName}`);
       const txtPath = document.metadata.source;
@@ -71,33 +69,22 @@ export class PineconeDB {
 
       const embeddings = await new OpenAIEmbeddings({ openAIApiKey: config.OPENAI_API_KEY }).embedDocuments(texts);
 
-      let batch: VectorItem[] = [];
-
-      for (let i = 0; i < chunks.length; i++) {
-        const chunk = chunks[i];
-        const vector = {
-          id: `${txtPath}-${i}`,
-          values: embeddings[i],
-          metadata: {
-            ...chunk.metadata,
-            loc: JSON.stringify(chunk.metadata.loc),
-            pageContent: chunk.pageContent,
-            txtPath,
-          }
+      const vectors:VectorItem[] = chunks.map((chunk, i) => ({
+        id: `${txtPath}-${i}`,
+        values: embeddings[i],
+        metadata: {
+          ...chunk.metadata,
+          loc: JSON.stringify(chunk.metadata.loc),
+          pageContent: chunk.pageContent,
+          txtPath,
         }
+      }));
 
-        batch.push(vector);
-
-        if (batch.length === batchSize || i === chunks.length - 1) {
-          await index.upsert({
-            upsertRequest: {
-              vectors: batch,
-            }
-          });
-
-          batch = [];
+      await index.upsert({
+        upsertRequest: {
+          vectors,
         }
-      }
+      });
     }
   }
 
@@ -117,7 +104,7 @@ export class PineconeDB {
 
     if (queryResult?.matches?.length) {
       const content = queryResult.matches
-        .map((match: any) => match.metadata.pageContent)
+        .map((match) => (match as VectorItem).metadata.pageContent)
         .join(' ');
 
       const result = await chain.call({
