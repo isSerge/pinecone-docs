@@ -2,6 +2,7 @@ import { FaissStore } from "langchain/vectorstores/faiss";
 import { Document } from 'langchain/document';
 import { OpenAIEmbeddings } from 'langchain/embeddings/openai';
 import { StuffDocumentsChain } from 'langchain/chains';
+import { RecursiveCharacterTextSplitter } from "langchain/text_splitter";
 
 import { logger } from "./logger"
 import { config } from "./config"
@@ -11,9 +12,10 @@ export class FaissDB {
 
   async init(docs: Document[]) {
     try {
+      const splitter = new RecursiveCharacterTextSplitter({ chunkSize: 1000 });
+      const texts = await splitter.splitDocuments(docs);
       const embeddings = new OpenAIEmbeddings({ openAIApiKey: config.OPENAI_API_KEY });
-      const client = await FaissStore.fromDocuments(docs, embeddings);
-
+      const client = await FaissStore.fromDocuments(texts, embeddings);
       this.client = client;
     } catch (err) {
       console.log(err)
